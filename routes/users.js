@@ -12,6 +12,10 @@ router.get('/insc', function(req, res, next) {
 });
 
 
+
+
+
+
 // Insert post3 les valeurs dynamiques req.body va afficher le body de requette json ecrite fel postman
 app.post('/addpost3', (req, res) => {
   let post = {title:"", body:""};
@@ -48,4 +52,17 @@ app.get('/getposts', (req, res) => {
   });
 });
 
+
+//inscription add
+app.post('/user', (req, res) => {
+  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
+ let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
+
+  let sql = 'INSERT INTO user SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('cuser added...');
+   });
+ });
 module.exports = router;
