@@ -25,7 +25,7 @@ const db = mysql.createConnection({
 
 // Create table
 app.get('/createpoststable', (req, res) => {
-    let sql = 'CREATE TABLE posts(id int AUTO_INCREMENT, title VARCHAR(255), body VARCHAR(255), ,telephone INT(20),PRIMARY KEY(id))';
+    let sql = 'CREATE TABLE posts(id int AUTO_INCREMENT, title VARCHAR(255), body VARCHAR(255),telephone INT(20),PRIMARY KEY(id))';
     db.query(sql, (err, result) => {
         if(err) throw err;
         console.log(result);
@@ -40,6 +40,16 @@ app.get('/usercreate', (req, res) => {
         if(err) throw err;
         console.log(result);
         res.send('inscription table created...');
+    });
+});
+
+//user2champs kahaw
+app.get('/usercreate3', (req, res) => {
+    let sql = 'CREATE TABLE user3 (id2 int AUTO_INCREMENT,email VARCHAR(255),password VARCHAR(255) ,PRIMARY KEY(id2))';
+    db.query(sql, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        res.send('inscription table3created...');
     });
 });
 app.use(cors());
@@ -126,18 +136,8 @@ app.post('/new2', function (req, res) {
   });
   
 
- //inscription add
-app.post('/user', (req, res) => {
-    // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
-   let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
+
   
-    let sql = 'INSERT INTO user SET ?';
-     let query = db.query(sql, req.body, (err, result) => {
-         if(err) throw err;
-         console.log(result);
-         res.send('c user added...');
-     });
-   });
   // Insert post4 les valeurs dynamiques req.body va afficher le body de requette mais f kol valeur bech n7otou req.body, najmou marra wa7da n7otaha f parametre de query
 app.post('/addpost4', (req, res) => {
     let post = {title:req.body.title, body:req.body.body};
@@ -148,8 +148,29 @@ app.post('/addpost4', (req, res) => {
         res.send('Post 4 added...');
     });
   });
- 
+ //inscription add
+app.post('/inscription', (req, res) => {
 
+  let post = {email:"", password:""};
+   let sql = 'INSERT INTO user3 SET ?';
+    let query = db.query(sql, req.body, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        res.send('user inscription added...');
+    });
+  });
+ //inscription add
+ app.post('/user', (req, res) => {
+  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
+ let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
+
+  let sql = 'INSERT INTO user SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('c user added...');
+   });
+ });
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
