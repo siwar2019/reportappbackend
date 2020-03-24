@@ -23,6 +23,7 @@ const db = mysql.createConnection({
 });
 
 
+
 // Create table
 app.get('/createpoststable', (req, res) => {
     let sql = 'CREATE TABLE posts(id int AUTO_INCREMENT, title VARCHAR(255), body VARCHAR(255),telephone INT(20),PRIMARY KEY(id))';
@@ -171,6 +172,83 @@ app.post('/inscription', (req, res) => {
        res.send('c user added...');
    });
  });
+
+//sign in parameters
+app.get('/signin2',function(req,res,next){
+ 
+
+  var email=req.body.email;
+  var password=req.body.password;
+  
+  
+  connection.query("select * from user3 where email=? AND password=?",[email,password],function(err,result,fields) 
+  {
+    if(err) console.log(err) ;
+    if(result.length>0) {
+      res.send({'succes':true,'message' : result[0].email}) ;
+  }else {
+    res.send({'succes':false,'message':'user not found, please try again'}) ;
+
+}
+   } ) ;
+});
+
+//test authentification
+app.get('/auth', (req, res)=>{
+  const email = req.body.email;
+  const password = req.body.password;
+  const string = "SELECT * FROM user3 WHERE email = ? AND password = ?"
+  if (email && password) {
+    db.query('SELECT * FROM user3 WHERE email = ? AND password = ?', [email, password], (err, results, fields)=> {
+          if (results.length > 0) {
+            req.session.loggedin = true;
+            req.session.email = email;
+              res.send({'succes':true,'message' : result[0].email}) ;
+              res.send('ok');
+           res.redirect('/home');
+          } else {
+              res.send('Incorrect Username and/or Password!');
+          }           
+          res.end();
+      });
+  } else {
+    
+     res.send('Please enter Username and Password!.');
+      res.end();
+  }
+});
+
+app.get('/home', (req, res)=> {
+  if (req.session.loggedin) {
+     res.send('Welcome back, ' + req.session.email + '!');
+  } else {
+      res.send('Please login to view this page!');
+  }
+  res.end();
+});
+
+//authetification !
+app.post('/authentification', function(req, res,next) {
+  var email = req.body.email;
+  var password = req.body.password;
+  //res.send({message:req.body.email});
+  db.query("select * from user where email=? AND password=?"
+  ,[email,password],function(err,results,fields) {
+    if(err){ 
+      console.log(err) ;
+      res.send({'succes':false,'message':'could not connect to the db'}) ;
+    }
+    if(results.length>0) {
+     
+     res.send({'succes':true,'user' : results[0].email}) ;
+  }else {
+    res.send({'succes':false,'message':'user not found, please try again'}) ;
+
+}
+   } ) ;
+});
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

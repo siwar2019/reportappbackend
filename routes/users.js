@@ -67,17 +67,6 @@ app.post('/user', (req, res) => {
  });
 
 
-//inscription add
-app.post('/inscription', (req, res) => {
-  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
- //let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
- let post = {email:"", password:""};
-  let sql = 'INSERT INTO user SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('user inscription added...');
-   });
- });
+
 
 module.exports = router;
