@@ -240,7 +240,7 @@ app.post('/authentification', function(req, res,next) {
     }
     if(results.length>0) {
      
-     res.send({'succes':true,'user' : results[0].email}) ;
+     res.send({'succes':true,'message' :results[0].email}) ;
   }else {
     res.send({'succes':false,'message':'user not found, please try again'}) ;
 
