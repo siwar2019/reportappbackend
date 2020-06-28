@@ -5,7 +5,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
+//muler configguration
+const multer = require('multer');
 var app = express();
 const mysql = require('mysql');
 const cors=require('cors');
@@ -14,6 +15,29 @@ const selectall='select * from user' ;
 var bodyParser = require("body-parser"); 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+//muler
+const Storage = multer.diskStorage({
+  destination(req, file, callback) {
+    callback(null, './images');
+  },
+  filename(req, file, callback) {
+    callback(null, `${file.fieldname}_${Date.now()}_${file.originalname}`);
+  },
+});
+
+const upload = multer({ storage: Storage });
+
+app.get('/api', (req, res) => {
+  res.status(200).send('You can post to /api/upload.');
+});
+
+app.post('/api/upload', upload.array('photo', 3), (req, res) => {
+  console.log('file', req.files);
+  console.log('body', req.body);
+  res.status(200).json({
+    message: 'success!',
+  });
+});
 // Create connection
 const db = mysql.createConnection({
     host     : 'localhost',
@@ -33,6 +57,84 @@ app.get('/createpoststable', (req, res) => {
         res.send('Posts table created...');
     });
 });
+
+// Create table imaage
+app.get('/createtableimage', (req, res) => {
+  let sql = 'CREATE TABLE image(id int AUTO_INCREMENT, filePath VARCHAR(255), fileData VARCHAR(255),fileUri INT(20),PRIMARY KEY(id))';
+  db.query(sql, (err, result) => {
+      if(err) throw err;
+      console.log(result);
+      res.send('image table created...');
+  });
+});
+// Create table video
+app.get('/createtablevideo', (req, res) => {
+  let sql = 'CREATE TABLE video(id int AUTO_INCREMENT, filePath VARCHAR(255), fileData VARCHAR(255),fileUri INT(20),PRIMARY KEY(id))';
+  db.query(sql, (err, result) => {
+      if(err) throw err;
+      console.log(result);
+      res.send('video table created...');
+  });
+});
+//video
+
+app.post('/video', (req, res) => {
+ let post = {filePath:"", fileData:"",fileUri:""};
+
+  let sql = 'INSERT INTO video SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('video added...');
+   });
+ });
+//image
+app.post('/image', (req, res) => {
+  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
+ let post = {filePath:"", fileData:"",fileUri:""};
+
+  let sql = 'INSERT INTO image SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('image added...');
+   });
+ });
+//inscription derniere
+app.post('/user', (req, res) => {
+  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
+ let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
+
+  let sql = 'INSERT INTO user SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('c user added...');
+   });
+ });
+
+//authetification !
+app.post('/authentification', function(req, res,next) {
+  var email = req.body.email;
+  var password = req.body.password;
+  //res.send({message:req.body.email});
+  db.query("select * from user where email=? AND password=?"
+  ,[email,password],function(err,results,fields) {
+    if(err){ 
+      console.log(err) ;
+      res.send({'succes':false,'message':'could not connect to the db'}) ;
+    }
+    if(results.length>0) {
+     
+     res.send({'succes':true,'message' :results[0].email}) ;
+  }else {
+    res.send({'succes':false,'message':'user not found, please try again'}) ;
+
+}
+   } ) ;
+});
+
+
 //allproduct from
 //user
 app.get('/usercreate', (req, res) => {
@@ -160,19 +262,7 @@ app.post('/inscription', (req, res) => {
         res.send('user inscription added...');
     });
   });
- //inscription add
- app.post('/user', (req, res) => {
-  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
- let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
-
-  let sql = 'INSERT INTO user SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('c user added...');
-   });
- });
-
+ 
 //sign in parameters
 app.get('/signin2',function(req,res,next){
  
@@ -227,28 +317,42 @@ app.get('/home', (req, res)=> {
   res.end();
 });
 
-//authetification !
-app.post('/authentification', function(req, res,next) {
-  var email = req.body.email;
+exports.login = function(req,res){
+  var email= req.body.email;
   var password = req.body.password;
-  //res.send({message:req.body.email});
-  db.query("select * from user where email=? AND password=?"
-  ,[email,password],function(err,results,fields) {
-    if(err){ 
-      console.log(err) ;
-      res.send({'succes':false,'message':'could not connect to the db'}) ;
+ var username = req.params.username;
+  connection.query('SELECT * FROM user WHERE username = ?',[username], function (error, results, fields) {
+  if (error) {
+   res.send({
+      "code":400,
+      "failed":"error ocurred"
+    })
+  }else{
+    if(results.length >0){
+      bcrypt.compare(password, results[0].password, function(err, doesMatch){
+        if (doesMatch){
+     res.send({
+       "code":200,
+       "success":"login sucessfull"
+         });
+      }else{
+     res.send({
+       "code":204,
+       "success":"Email and password does not match"
+         });
+      }
+    });
+  }
+    else{
+      res.send({
+        "code":204,
+        "success":"Email does not exits"
+          });
     }
-    if(results.length>0) {
-     
-     res.send({'succes':true,'message' :results[0].email}) ;
-  }else {
-    res.send({'succes':false,'message':'user not found, please try again'}) ;
+  }
+  });
 
 }
-   } ) ;
-});
-
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
