@@ -1,7 +1,13 @@
+
+
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+//formidable ibrary (final, pr imag video)
+var http = require('http');
+var formidable = require('formidable');
+var fs = require('fs');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -10,10 +16,14 @@ const multer = require('multer');
 var app = express();
 const mysql = require('mysql');
 const cors=require('cors');
-const selectall='select * from user' ;
+
 //body parser
+//set the limite file
 var bodyParser = require("body-parser"); 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
+ 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 //muler
 const Storage = multer.diskStorage({
@@ -76,36 +86,56 @@ app.get('/createtablevideo', (req, res) => {
       res.send('video table created...');
   });
 });
-//video
 
-app.post('/video', (req, res) => {
- let post = {filePath:"", fileData:"",fileUri:""};
-
-  let sql = 'INSERT INTO video SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('video added...');
-   });
- });
-//image
+//image final
 app.post('/image', (req, res) => {
   // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
- let post = {filePath:"", fileData:"",fileUri:""};
+  console.log("image", req.body)
+  var form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    console.log(files)
+    var oldpath = files.image.path;
+    var newpath = './public/uploads/' + files.image.name;
+    fs.rename(oldpath, newpath, function (err) {
+      if (err) throw err;
+      
 
-  let sql = 'INSERT INTO image SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('image added...');
-   });
+      let sql = "INSERT INTO images (filePath) VALUES('" + files.image.name + "')";
+      let query = db.query(sql, (err, result) => {
+          if(err) throw err;
+          console.log(result);
+          res.send('image added...');
+      });
+    });
  });
+});
+//video apload final
+app.post('/video2', (req, res) => {
+  
+  var form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    console.log(files)
+    var oldpath = files.videos.path;
+    var newpath = './public/uploads/' + files.videos.name;
+    fs.rename(oldpath, newpath, function (err) {
+      if (err) throw err;
+      
+
+      let sql = "INSERT INTO video (filePath) VALUES('" + files.videos.name + "')";
+      let query = db.query(sql, (err, result) => {
+          if(err) throw err;
+          console.log(result);
+          res.send('image added...');
+      });
+    });
+ });
+});
 //inscription derniere
 app.post('/user', (req, res) => {
   // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
  let post = {email:"", password:"",firstname:"",lastname:"",address:"",tel:""};
 
-  let sql = 'INSERT INTO user SET ?';
+  let sql = 'INSERT INTO utilisateurs SET ?';
    let query = db.query(sql, req.body, (err, result) => {
        if(err) throw err;
        console.log(result);
@@ -118,7 +148,7 @@ app.post('/authentification', function(req, res,next) {
   var email = req.body.email;
   var password = req.body.password;
   //res.send({message:req.body.email});
-  db.query("select * from user where email=? AND password=?"
+  db.query("select * from utilisateurs where email=? AND password=?"
   ,[email,password],function(err,results,fields) {
     if(err){ 
       console.log(err) ;
@@ -156,6 +186,7 @@ app.get('/usercreate3', (req, res) => {
     });
 });
 app.use(cors());
+
 //afficher les donneés de users 
 app.get('/afficherusers', (req, res) => {
   let sql = 'select * from user';
@@ -364,3 +395,28 @@ app.use('/users', usersRouter);
 
 module.exports = app;
 
+/* image et video l version 9dima
+//image correct 
+app.post('/image', (req, res) => {
+  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
+ let post = {filePath:"", fileData:"",fileUri:""};
+
+  let sql = 'INSERT INTO images SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('image added...');
+   });
+ }) 
+//video
+
+app.post('/video', (req, res) => {
+ let post = {filePath:"", fileData:"",fileUri:""};
+
+  let sql = 'INSERT INTO video SET ?';
+   let query = db.query(sql, req.body, (err, result) => {
+       if(err) throw err;
+       console.log(result);
+       res.send('video added...');
+   });
+ }); */
