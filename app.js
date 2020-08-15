@@ -27,9 +27,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 5
  app.use(bodyParser.json());
 
 //muler
-// destination des images, ./images, relative au fichier app.js, normalement fel  dossier courant, mais ma femmech dossier image
-//oui les image sajalthom f public/uploads, ,h athika /image ta9rib jebtha coller mel google ki jiet config mta3 multer w f li5er masta3mltouch sta3mlit biblothq formidable
-// doct multer zeid ? j c as nsit wlh, 5alih, ok
+
 const Storage = multer.diskStorage({
   destination(req, file, callback) {
     callback(null, './images');
@@ -38,32 +36,14 @@ const Storage = multer.diskStorage({
     callback(null, `${file.fieldname}_${Date.now()}_${file.originalname}`);
   },
 });
-//la7dha brabi: hia bere7 kanetch hathi /api nn? badaltha enty kif bech ta3ml proxy nn?
-// nn, el bere7 fel backend lo5ra, proxy fel package.json mte3 dev server
-// la7tha 5ellini nchouf w taou nfehmek chnia la7kaya mte3 dev server w proxy
-// apperemment femma confusion z8ira 3endek, a propos des dev server w les proxy m3a les apie
-//eni l7a9 mec fahethom ntaba3 tuto n7ot kima ya3ml houa w ùanefhemch lweh aslan , bhama j c :p  ama lfayda temchi n9oul, apre st anefhem
-//7asilou tfadhel, man3atlikch 
-//nn, dima a3mel intrervention heka, comme ça nefhem fech t5ammem we nefhem projet mte3ek
-//dacc :p
-// ok, lanci l'app react native, 
+
 const upload = multer({ storage: Storage });
 
  app.get('/', (req, res) => {
   res.status(200).send('You can post to /api/upload.');
 });
  
-// Le mieux tkelmeni w t9olli chnwya yemchi w yemchich, heka bech ta5ou barcha wa9t
-// w normalement tefhem 5er
-//chnoua el hajat eli fesdouli f code to9sed?
-// enti taou ki jarrabet, chnoua 7ebbit tjareb, par exemple, 5ater elli badeltou, ma3andou 7etta da5l bi 7atta chey
-// juste endpoint thaye3, bech itesti bih., ..d.onc impossible ikoun houa sbeb,
-//5ater fema 7aja mech m5olya el connxiontsir bin el front w back,,eni haka mech fehmetou app.get aslan, w marithech 9bel
-//eka 3leh na7itha, 9olet balik url mta3ftech yetbadel en fonction de hathaka,
-// el app react native connecté taou wella la ?
-//oui, behi, 
-// bug, clavier inagez
-// be
+
 app.post('/api/upload', upload.array('photo', 3), (req, res) => {
   console.log('file', req.files);
   console.log('body', req.body);
@@ -117,7 +97,7 @@ app.post('/all', (req, res) => {
   var form = new formidable.IncomingForm({multiples: true});
   form.parse(req, function (err, fields, files) {/* 
     console.log({fields, files});
-    res.send(); 5alheli gethi
+    res.send(); 
     return; */
     var oldpath = files.image.path;
     var newpath = './public/uploads/' + files.image.name;
@@ -125,8 +105,7 @@ app.post('/all', (req, res) => {
      */
     fs.rename(oldpath, newpath, function (err) {
       if (err) throw err;
-//video.name mahech declaré fou9 kkma mta3 image
-//houma les champs elli 3amarthom fel postman,et na3ref ama no9sed nejem nesta.mlha m3a ay requett post?? ok : 
+
       let sql = "INSERT INTO utilisateurs (image,video,description,incident_type) VALUES('" + files.image.name +"','" +files.video.name+"','"+ fields.description + "','"+ fields.incident_type +"')";
       let query = db.query(sql, (err, result) => {
         if (err) throw err;
