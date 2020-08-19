@@ -93,7 +93,7 @@ app.get('/createtablevideo', (req, res) => {
 
 app.post('/all', (req, res) => {
   console.log("image", req.body)
-  console.log(req.body);
+  console.log("video",req.body);
   var form = new formidable.IncomingForm({multiples: true});
   form.parse(req, function (err, fields, files) {/* 
     console.log({fields, files});
@@ -106,7 +106,7 @@ app.post('/all', (req, res) => {
     fs.rename(oldpath, newpath, function (err) {
       if (err) throw err;
 
-      let sql = "INSERT INTO utilisateurs (image,video,description,incident_type) VALUES('" + files.image.name +"','" +files.video.name+"','"+ fields.description + "','"+ fields.incident_type +"')";
+      let sql = "INSERT INTO utilisateurs (image,video,description,incident_type,position) VALUES('" + files.image.name +"','" + files.video.name +"','"+ fields.description + "','"+ fields.incident_type +"','"+ fields.position +"')";
       let query = db.query(sql, (err, result) => {
         if (err) throw err;
         console.log(result);
