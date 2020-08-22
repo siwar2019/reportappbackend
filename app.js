@@ -8,7 +8,7 @@ var logger = require('morgan');
 var http = require('http');
 var formidable = require('formidable');
 var fs = require('fs');
-
+const jwt = require('jsonwebtoken'); //jsonwebtokin
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 //muler configguration
@@ -91,28 +91,34 @@ app.get('/createtablevideo', (req, res) => {
 });
 //new function englobe tout
 
-app.post('/all', (req, res) => {
-  console.log("image", req.body)
-  console.log("video",req.body);
+app.post('/all',  (req, res) => {
+  //console.log("£££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££££toekn", req.headers)
+  const decoded =  jwt.verify(req.headers.token, 'jwt_secret');
+  const userId = decoded.id;
+  const sql2 = "select * from utilisateurs where id ='"+ userId+"' ";
+
+const user = db.query(sql2);
+ console.log("userrrrrrrrrrrrrrr", user)
   var form = new formidable.IncomingForm({multiples: true});
-  form.parse(req, function (err, fields, files) {/* 
-    console.log({fields, files});
+   form.parse(req, function (err, fields, files) {/* 
+    console.log({fielsds, files});
     res.send(); 
     return; */
-    var oldpath = files.image.path;
-    var newpath = './public/uploads/' + files.image.name;
-    /* var newpath = 'E:/PFE_ING/Reactjsapp/teestttt/src/components/uploabds' + files.image.name;
-     */
-    fs.rename(oldpath, newpath, function (err) {
+    let oldVideoPath = files.video.path;
+    let oldImagePath = files.image.path;
+    let videoName = new Date().getTime() + files.video.name;
+    let imageName = new Date().getTime() + files.image.name;
+    let newVideoPath = './public/uploads/' + videoName;
+    let newImagePath = './public/uploads/' + imageName;
+    fs.renameSync(oldVideoPath, newVideoPath);
+    fs.renameSync(oldImagePath, newImagePath);
+    let sql = "INSERT INTO incidents (image,video,description,incident_type,position) VALUES('" + imageName +"','" + videoName +"','"+ fields.description + "','"+ fields.incident_type +"','"+ fields.position +"')";
+    let query = db.query(sql, (err, result) => {
       if (err) throw err;
-
-      let sql = "INSERT INTO utilisateurs (image,video,description,incident_type,position) VALUES('" + files.image.name +"','" + files.video.name +"','"+ fields.description + "','"+ fields.incident_type +"','"+ fields.position +"')";
-      let query = db.query(sql, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        res.send('informations added...');
-      });
+      //console.log(result);
+      res.send('informations added...');
     });
+
   });
 });
 
@@ -220,8 +226,13 @@ app.post('/authentification', function (req, res, next) {
         res.send({ 'succes': false, 'message': 'could not connect to the db' });
       }
       if (results.length > 0) {
+        console.log("resultat", results
+        )
+        const token = jwt.sign({ id: results[0].id }, 'jwt_secret', { expiresIn: '24h' });
+        console.log("token", token)
+
         // ouvre le composant qui reçoit cette reponse stp
-        res.send({ 'succes': true, 'message': results[0].email });
+        res.send({ 'succes': true, 'message': results[0].email, token });
       } else {
         res.send({ 'succes': false, 'message': 'user not found, please try again' });
 
@@ -427,28 +438,3 @@ app.use('/users', usersRouter);
 
 module.exports = app;
 
-/* image et video l version 9dima
-//image correct
-app.post('/image', (req, res) => {
-  // let post = {email:req.body.email, password:req.body.password,firstname:req.body.firstname,lastname:req.body.lastname,address:req.body.address ,tel:req.body.tel};
- let post = {filePath:"", fileData:"",fileUri:""};
-
-  let sql = 'INSERT INTO images SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('image added...');
-   });
- })
-//video
-
-app.post('/video', (req, res) => {
- let post = {filePath:"", fileData:"",fileUri:""};
-
-  let sql = 'INSERT INTO video SET ?';
-   let query = db.query(sql, req.body, (err, result) => {
-       if(err) throw err;
-       console.log(result);
-       res.send('video added...');
-   });
- }); */
