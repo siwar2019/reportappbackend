@@ -96,14 +96,15 @@ app.post('/all',  (req, res) => {
   const decoded =  jwt.verify(req.headers.token, 'jwt_secret');
   const userId = decoded.id;
   const sql2 = "select * from utilisateurs where id ='"+ userId+"' ";
+ db.query(sql2, (err, user) => {
+    if (err) throw err;
+    console.log("connected use====>", user[0])
 
-const user = db.query(sql2);
- console.log("userrrrrrrrrrrrrrr", user)
-  var form = new formidable.IncomingForm({multiples: true});
-   form.parse(req, function (err, fields, files) {/* 
-    console.log({fielsds, files});
-    res.send(); 
-    return; */
+var form = new formidable.IncomingForm({multiples: true});
+   form.parse(req, function (err, fields, files) {
+   // console.log({fields, files});
+   
+  
     let oldVideoPath = files.video.path;
     let oldImagePath = files.image.path;
     let videoName = new Date().getTime() + files.video.name;
@@ -112,14 +113,19 @@ const user = db.query(sql2);
     let newImagePath = './public/uploads/' + imageName;
     fs.renameSync(oldVideoPath, newVideoPath);
     fs.renameSync(oldImagePath, newImagePath);
-    let sql = "INSERT INTO incidents (image,video,description,incident_type,position) VALUES('" + imageName +"','" + videoName +"','"+ fields.description + "','"+ fields.incident_type +"','"+ fields.position +"')";
+    let sql = "INSERT INTO incidents (image,video,description,incident_type,position,email) VALUES('" + imageName +"','" + videoName +"','"+ fields.description + "','"+ fields.incident_type +"','"+ fields.position +"','"+ user[0].email+"')";
     let query = db.query(sql, (err, result) => {
       if (err) throw err;
       //console.log(result);
-      res.send('informations added...');
+      return res.send('informations added...');
     });
 
   });
+  
+  })
+
+
+    
 });
 
 //save descrption,type incident
@@ -130,6 +136,7 @@ app.post('/savedata', (req, res) => {
   let query = db.query(sql, req.body, (err, result) => {
     if (err) throw err;
     console.log(result);
+    //
     res.send('desc added...');
   });
 });
