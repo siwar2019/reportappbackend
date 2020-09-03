@@ -39,10 +39,6 @@ const Storage = multer.diskStorage({
 
 const upload = multer({ storage: Storage });
 
- app.get('/', (req, res) => {
-  res.status(200).send('You can post to /api/upload.');
-});
- 
 
 app.post('/api/upload', upload.array('photo', 3), (req, res) => {
   console.log('file', req.files);
@@ -119,7 +115,22 @@ var form = new formidable.IncomingForm({multiples: true});
       //console.log(result);
       return res.send('informations added...');
     });
+//
+//notifications
 
+const notifier = require('node-notifier');
+// String
+notifier.notify('Please check your website');
+// Object
+notifier.notify({
+  'title': 'An other incident is added',
+  'subtitle': 'someone need help',
+  'message': 'check it now!',
+  'icon': 'dwb-logo.png',
+  'contentImage': 'blog.png',
+  'sound': 'ding.mp3',
+  'wait': true
+});
   });
   
   })
